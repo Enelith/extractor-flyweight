@@ -13,8 +13,9 @@ import org.apache.commons.lang3.StringUtils;
  * @author jvinh
  */
 public class ExtractorUtils {
-    private static final String DATE_PATTERN = "yyyyMMdd";
     private static final String ASIZE_SEPARATOR = "-";
+    private static final String DATE_PATTERN = "yyyyMMdd";
+    private static final String VALIDATOR_QUERY_SEPARATOR = "validator.query.separator";
 
     /**
      * @param  <T> class générique
@@ -30,27 +31,37 @@ public class ExtractorUtils {
 	    return t == null;
 	}
     }
-    
+
     public static String dateConvertor(Date dateToConvert) {
 	DateFormat f = new SimpleDateFormat(DATE_PATTERN);
-	
-	return (!isEmpty(dateToConvert) ? f.format(dateToConvert) : "");
+
+	return (!isEmpty(dateToConvert)
+		    ? f.format(dateToConvert)
+		    : "");
     }
-    
-    public static Integer extractArrayMaxSizeFromValidatorQuery(String sQuery) {
-	Integer result = 0;
-	if(!ExtractorUtils.isEmpty(sQuery)
-		    && sQuery.startsWith("aSize")) {
-	    String[] sQueryArray = sQuery.split(ASIZE_SEPARATOR);
-	    
-	    result = (sQueryArray.length > 2 ? Integer.valueOf(sQueryArray[2]) : 0);
+
+    public static Integer extractArrayMaxSizeFromValidatorQuery(String sValidatorQuery) {
+	if (!ExtractorUtils.isEmpty(sValidatorQuery)) {
+	    String[] sValidatorQueryArray =
+			sValidatorQuery.split(ExtractorUtils.getProperty(VALIDATOR_QUERY_SEPARATOR));
+
+	    for (String sQuery : sValidatorQueryArray) {
+		if (!ExtractorUtils.isEmpty(sQuery)
+			    && sQuery.startsWith("aSize")) {
+		    String[] sQueryArray = sQuery.split(ASIZE_SEPARATOR);
+
+		    return (sQueryArray.length > 2
+				? Integer.valueOf(sQueryArray[2])
+				: 0);
+		}
+	    }
 	}
-	return result;
+	return new Integer(0);
     }
-    
+
     public static String getProperty(String propertyKey) {
 	String result = "";
-	if(!ExtractorUtils.isEmpty(ExtractorProperties.properties)) {
+	if (!ExtractorUtils.isEmpty(ExtractorProperties.properties)) {
 	    result = ExtractorProperties.properties.getProperty(propertyKey);
 	}
 	return result;
